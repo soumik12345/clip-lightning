@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from transformers import BertTokenizer
-from image_retrieval.dataloaders.base import ImageRetrievalDataset
+from image_retrieval.dataloaders import Flickr8kDataset
 
 
-dataset = ImageRetrievalDataset(
+dataset = Flickr8kDataset(
     artifact_id="geekyrakshit/clip-image-retrieval/flickr-8k:latest",
     tokenizer=BertTokenizer.from_pretrained("bert-base-uncased"),
 )
