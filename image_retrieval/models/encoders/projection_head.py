@@ -1,11 +1,9 @@
 import torch
 from torch import nn
 
+
 class ProjectionHead(nn.Module):
-    def __init__(self, 
-                 embedding_dim: int, 
-                 projection_dim: int, 
-                 dropout: float) -> None:
+    def __init__(self, embedding_dim: int, projection_dim: int, dropout: float) -> None:
         super().__init__()
 
         self.projection = nn.Linear(embedding_dim, projection_dim)
