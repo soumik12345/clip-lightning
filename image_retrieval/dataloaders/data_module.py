@@ -34,7 +34,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.num_workers = num_workers
 
     def split_data(self, dataset: ImageRetrievalDataset, val_split: float):
-        train_length = (1 - val_split) * len(dataset)
+        train_length = int((1 - val_split) * len(dataset))
         val_length = len(dataset) - train_length
         train_dataset, val_dataset = random_split(
             dataset, lengths=[train_length, val_length]
@@ -50,6 +50,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         dataset = DATASET_LOOKUP[dataset_name](
             artifact_id=self.artifact_id,
             tokenizer=self.tokenizer,
+            target_size=self.target_size,
             max_length=self.max_length,
         )
         self.train_dataset, self.val_dataset = self.split_data(
