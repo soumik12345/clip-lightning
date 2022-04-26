@@ -16,6 +16,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self,
         artifact_id: str,
         tokenizer=None,
+        target_size: Optional[int] = None,
         max_length: int = 100,
         train_batch_size: int = 16,
         val_batch_size: int = 16,
@@ -24,6 +25,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         super().__init__(**kwargs)
         self.artifact_id = artifact_id
         self.tokenizer = tokenizer
+        self.target_size = target_size
         self.max_length = max_length
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size

@@ -1,13 +1,20 @@
 import os
 import wandb
 import pandas as pd
+from typing import Optional
 
 from .base import ImageRetrievalDataset
 
 
 class Flickr30kDataset(ImageRetrievalDataset):
-    def __init__(self, artifact_id: str, tokenizer=None, max_length: int = 100) -> None:
-        super().__init__(artifact_id, tokenizer, max_length)
+    def __init__(
+        self,
+        artifact_id: str,
+        tokenizer=None,
+        target_size: Optional[int] = None,
+        max_length: int = 100,
+    ) -> None:
+        super().__init__(artifact_id, tokenizer, target_size, max_length)
 
     def fetch_dataset(self):
         if wandb.run is None:
