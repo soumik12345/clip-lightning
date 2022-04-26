@@ -1,5 +1,5 @@
+import torch
 import unittest
-
 from transformers import BertTokenizer
 from image_retrieval.dataloaders import Flickr8kDataset
 
@@ -20,5 +20,5 @@ class Flickr8KTester(unittest.TestCase):
         image, caption, input_ids, attention_mask = dataset[0]
         assert isinstance(caption, str)
         assert image.shape == (3, 224, 224)
-        assert input_ids.shape == (40455, 42)
-        assert attention_mask.shape == (40455, 42)
+        assert input_ids.shape == torch.Size([42])
+        assert attention_mask.shape == torch.Size([42])
