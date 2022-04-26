@@ -11,8 +11,10 @@ class Flickr30kDataset(ImageRetrievalDataset):
 
     def fetch_dataset(self):
         if wandb.run is None:
-            wandb.init()
-        artifact = wandb.use_artifact(self.artifact_id, type="dataset")
+            api = wandb.Api()
+            artifact = api.artifact(self.artifact_id, type="dataset")
+        else:
+            artifact = wandb.use_artifact(self.artifact_id, type="dataset")
         artifact_dir = artifact.download()
         annotations = pd.read_csv(os.path.join(artifact_dir, "results.csv"))
         image_files = [
