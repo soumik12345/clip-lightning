@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.optim as optim
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
 
@@ -18,6 +19,9 @@ class CLIPDualEncoderModel(LightningModule):
         projection_dims: int = 256,
         dropout: float = 0.0,
         temperature: float = 1.0,
+        weight_decay: float = 0.0,
+        lr_scheduler_patience: float = 1.0,
+        lr_scheduler_factor: float = 0.8,
         *args,
         **kwargs,
     ) -> None:
@@ -42,6 +46,9 @@ class CLIPDualEncoderModel(LightningModule):
         )
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.temperature = temperature
+        self.weight_decay = weight_decay
+        self.lr_scheduler_patience = lr_scheduler_patience
+        self.lr_scheduler_factor = lr_scheduler_factor
 
     def _compute_losses(self, image_embeddings, text_embeddings):
         logits = (text_embeddings @ image_embeddings.T) / self.temperature
@@ -63,4 +70,26 @@ class CLIPDualEncoderModel(LightningModule):
         image_embeddings = self.image_projection(image_features)
         text_embeddings = self.text_projection(text_features)
 
-        return self._compute_losses(image_embeddings, text_embeddings).mean()
+        return image_embeddings, text_embeddings
+
+    def configure_optimizers(self):
+        optimizer = optim.AdamW(self.parameters(), weight_decay=self.weight_decay)
+        lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="min",
+            patience=self.lr_scheduler_patience,
+            factor=self.lr_scheduler_factor,
+        )
+        return [optimizer], [lr_scheduler]
+
+    def training_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        self.log("train_loss", loss)
+        return loss
+    
+    def validation_step(self, batch, *args, **kwargs):
+        image_embeddings, text_embeddings = self.forward(batch)
+        loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        self.log("val_loss", loss)
+        return loss
