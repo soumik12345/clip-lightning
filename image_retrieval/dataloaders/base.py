@@ -39,6 +39,6 @@ class ImageRetrievalDataset(Dataset):
         )
         image = torch.tensor(np.array(image)).permute(2, 0, 1).float()
         caption = self.captions[index]
-        input_ids = torch.tensor(self.tokenized_captions["input_ids"])
-        attention_mask = torch.tensor(self.tokenized_captions["attention_mask"])
+        input_ids = torch.tensor(self.tokenized_captions["input_ids"])[index]
+        attention_mask = torch.tensor(self.tokenized_captions["attention_mask"])[index]
         return image, caption, input_ids, attention_mask

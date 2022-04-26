@@ -6,6 +6,7 @@ from pytorch_lightning import LightningDataModule
 from .base import ImageRetrievalDataset
 from .flickr8k import Flickr8kDataset
 from .flickr30k import Flickr30kDataset
+from .utils import collate_fn
 
 
 DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset}
@@ -20,6 +21,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         max_length: int = 100,
         train_batch_size: int = 16,
         val_batch_size: int = 16,
+        num_workers: int = 4,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -29,6 +31,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.max_length = max_length
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
+        self.num_workers = num_workers
 
     def split_data(self, dataset: ImageRetrievalDataset, val_split: float):
         train_length = (1 - val_split) * len(dataset)
@@ -54,7 +57,17 @@ class ImageRetrievalDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.train_batch_size)
+        return DataLoader(
+            self.train_dataset,
+            batch_size=self.train_batch_size,
+            collate_fn=collate_fn,
+            num_workers=self.num_workers,
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.val_batch_size)
+        return DataLoader(
+            self.val_dataset,
+            batch_size=self.val_batch_size,
+            collate_fn=collate_fn,
+            num_workers=self.num_workers,
+        )
