@@ -1,0 +1,19 @@
+name: Run tests
+on:
+  pull_request:
+    paths:
+      - .github/workflows/**
+      - image_retrieval/**
+      - tests.py
+      - requirements.txt
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    container: pytorch/pytorch
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v2
+      - run: |
+          pip install -U pip
+          pip install -r requirements.docker
+          pytest tests.py
