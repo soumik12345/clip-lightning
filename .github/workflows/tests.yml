@@ -11,15 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     container: pytorch/pytorch
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
       - name: Checkout
-        uses: actions/checkout@v2
-        run: |
+      - uses: actions/checkout@v2
+      - run: |
           pip install -U pip
           pip install -r requirements.docker
           pytest tests.py
