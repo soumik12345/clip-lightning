@@ -2,6 +2,7 @@ from typing import Optional
 
 from torch.utils.data import random_split, DataLoader
 from pytorch_lightning import LightningDataModule
+from transformers import AutoTokenizer
 
 from .base import ImageRetrievalDataset
 from .flickr8k import Flickr8kDataset
@@ -16,8 +17,8 @@ class ImageRetrievalDataModule(LightningDataModule):
     def __init__(
         self,
         artifact_id: str,
-        tokenizer=None,
-        target_size: Optional[int] = None,
+        tokenizer_alias: Optional[str] = None,
+        target_size: Optional[int] = 512,
         max_length: int = 100,
         train_batch_size: int = 16,
         val_batch_size: int = 16,
@@ -26,7 +27,7 @@ class ImageRetrievalDataModule(LightningDataModule):
     ):
         super().__init__(**kwargs)
         self.artifact_id = artifact_id
-        self.tokenizer = tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
         self.target_size = target_size
         self.max_length = max_length
         self.train_batch_size = train_batch_size

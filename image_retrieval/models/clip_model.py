@@ -50,6 +50,8 @@ class CLIPDualEncoderModel(LightningModule):
         self.lr_scheduler_patience = lr_scheduler_patience
         self.lr_scheduler_factor = lr_scheduler_factor
 
+        self.save_hyperparameters()
+
     def _compute_losses(self, image_embeddings, text_embeddings):
         logits = (text_embeddings @ image_embeddings.T) / self.temperature
         images_similarity = image_embeddings @ image_embeddings.T
@@ -80,7 +82,11 @@ class CLIPDualEncoderModel(LightningModule):
             patience=self.lr_scheduler_patience,
             factor=self.lr_scheduler_factor,
         )
-        return [optimizer], [lr_scheduler]
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": lr_scheduler,
+            "monitor": "val_loss"
+        }
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
