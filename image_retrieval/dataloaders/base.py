@@ -19,10 +19,10 @@ class ImageRetrievalDataset(Dataset):
         self.artifact_id = artifact_id
         self.target_size = target_size
         self.image_files, self.captions = self.fetch_dataset()
-        if tokenizer:
-            self.tokenized_captions = tokenizer(
-                self.captions, padding=True, truncation=True, max_length=max_length
-            )
+        assert tokenizer is not None
+        self.tokenized_captions = tokenizer(
+            self.captions, padding=True, truncation=True, max_length=max_length
+        )
 
     @abstractmethod
     def fetch_dataset(self):
