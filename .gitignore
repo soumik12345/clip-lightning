@@ -131,3 +131,6 @@ dmypy.json
 # WandB
 artifacts/
 wandb/
+
+# lightning
+lightning_logs/
