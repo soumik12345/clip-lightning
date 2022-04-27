@@ -10,4 +10,4 @@ class CLI(cli.LightningCLI):
 
 
 if __name__ == "__main__":
-    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule)
+    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None)
