@@ -49,7 +49,11 @@ class ImageRetrievalDataset(Dataset):
         return len(self.captions)
 
     def __getitem__(self, index):
-        image = self.read_image(self.images[index]) if not self.lazy_loading else self.images[index]
+        image = (
+            self.read_image(self.images[index])
+            if not self.lazy_loading
+            else self.images[index]
+        )
         image = torch.tensor(np.array(image)).permute(2, 0, 1).float()
         caption = self.captions[index]
         input_ids = torch.tensor(self.tokenized_captions["input_ids"])[index]

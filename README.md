@@ -10,7 +10,8 @@ python image_retrieval/cli.py fit \
     --data.train_batch_size 32 \
     --data.val_batch_size 32 \
     --model.image_encoder_alias resnet50 \
-    --model.text_encoder_alias bert-base-uncased \
+    --model.text_encoder_alias distilbert-base-uncased \
+    --trainer.precision 16 \
     --trainer.accelerator gpu \
     --trainer.max_epochs 5 \
     --trainer.logger WandbLogger
