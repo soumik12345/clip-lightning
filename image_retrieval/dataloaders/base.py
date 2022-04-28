@@ -32,13 +32,14 @@ class ImageRetrievalDataset(Dataset):
             self.captions, padding=True, truncation=True, max_length=max_length
         )
 
-    def read_image(self, index):
-        image = Image.open(self.image_files[index])
+    def read_image(self, image_file):
+        image = Image.open(image_file)
         image = (
             image.resize((self.target_size, self.target_size))
             if self.target_size is not None
             else image
         )
+        return image
 
     @abstractmethod
     def fetch_dataset(self):
