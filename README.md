@@ -7,8 +7,9 @@ To train the model use the following command
 ```shell
 python image_retrieval/cli.py fit \
     --data.artifact_id geekyrakshit/clip-image-retrieval/flickr-8k:latest \
-    --data.train_batch_size 32 \
-    --data.val_batch_size 32 \
+    --data.train_batch_size 64 \
+    --data.val_batch_size 64 \
+    --data.max_length 200 \
     --model.image_encoder_alias resnet50 \
     --model.text_encoder_alias distilbert-base-uncased \
     --trainer.precision 16 \
