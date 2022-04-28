@@ -85,7 +85,7 @@ class CLIPDualEncoderModel(LightningModule):
         return {
             "optimizer": optimizer,
             "lr_scheduler": lr_scheduler,
-            "monitor": "val_loss"
+            "monitor": "val_loss",
         }
 
     def training_step(self, batch, *args, **kwargs):
@@ -93,7 +93,7 @@ class CLIPDualEncoderModel(LightningModule):
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         self.log("train_loss", loss)
         return loss
-    
+
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
