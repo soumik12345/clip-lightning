@@ -1,5 +1,5 @@
 # Pull Base Image
-FROM pytorchlightning/pytorch_lightning:base-cuda-py3.7-torch1.11
+FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 
 # Set Working Directory
 RUN mkdir /usr/src/clip
