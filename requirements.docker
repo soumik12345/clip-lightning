@@ -5,3 +5,5 @@ pytest>=7.1.2
 timm>=0.5.4
 transformers>=4.18.0
 wandb>=0.12.15
+docstring_parser
+jsonargparse

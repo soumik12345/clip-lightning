@@ -5,7 +5,17 @@ This repository consists of an implementation of CLIP in PyTorch Lightning.
 To train the model use the following command
 
 ```shell
-python image_retrieval/cli.py fit --model.image_encoder_alias resnet50 --model.text_encoder_alias bert-base-uncased --data.artifact_id geekyrakshit/clip-image-retrieval/flickr-8k:latest --trainer.accelerator gpu
+python image_retrieval/cli.py fit \
+    --data.artifact_id geekyrakshit/clip-image-retrieval/flickr-8k:latest \
+    --data.train_batch_size 64 \
+    --data.val_batch_size 64 \
+    --data.max_length 200 \
+    --model.image_encoder_alias resnet50 \
+    --model.text_encoder_alias distilbert-base-uncased \
+    --trainer.precision 16 \
+    --trainer.accelerator gpu \
+    --trainer.max_epochs 5 \
+    --trainer.logger WandbLogger
 ```
 
 This will train the CLIP model with ResNet50 as the image encoder and BERT base uncased as the text encoder on the data stored as a W&B artifact.

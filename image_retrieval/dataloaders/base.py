@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from PIL import Image
 from typing import Optional
 from abc import abstractmethod
@@ -14,15 +15,31 @@ class ImageRetrievalDataset(Dataset):
         tokenizer=None,
         target_size: Optional[int] = None,
         max_length: int = 100,
+        lazy_loading: bool = False,
     ) -> None:
         super().__init__()
         self.artifact_id = artifact_id
         self.target_size = target_size
-        self.image_files, self.captions = self.fetch_dataset()
+        image_files, self.captions = self.fetch_dataset()
+        self.lazy_loading = lazy_loading
+        self.images = (
+            [self.read_image(idx) for idx in tqdm(range(len(self)))]
+            if lazy_loading
+            else image_files
+        )
         assert tokenizer is not None
         self.tokenized_captions = tokenizer(
             self.captions, padding=True, truncation=True, max_length=max_length
         )
+
+    def read_image(self, image_file):
+        image = Image.open(image_file)
+        image = (
+            image.resize((self.target_size, self.target_size))
+            if self.target_size is not None
+            else image
+        )
+        return image
 
     @abstractmethod
     def fetch_dataset(self):
@@ -32,11 +49,10 @@ class ImageRetrievalDataset(Dataset):
         return len(self.captions)
 
     def __getitem__(self, index):
-        image = Image.open(self.image_files[index])
         image = (
-            image.resize((self.target_size, self.target_size))
-            if self.target_size is not None
-            else image
+            self.read_image(self.images[index])
+            if not self.lazy_loading
+            else self.images[index]
         )
         image = torch.tensor(np.array(image)).permute(2, 0, 1).float()
         caption = self.captions[index]

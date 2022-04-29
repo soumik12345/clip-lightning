@@ -1,3 +1,5 @@
+import itertools
+
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -20,6 +22,9 @@ class CLIPDualEncoderModel(LightningModule):
         dropout: float = 0.0,
         temperature: float = 1.0,
         weight_decay: float = 0.0,
+        head_lr: float = 1e-3,
+        image_encoder_lr: float = 1e-4,
+        text_encoder_lr: float = 1e-5,
         lr_scheduler_patience: float = 1.0,
         lr_scheduler_factor: float = 0.8,
         *args,
@@ -47,6 +52,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.temperature = temperature
         self.weight_decay = weight_decay
+        self.head_lr = head_lr
+        self.image_encoder_lr = image_encoder_lr
+        self.text_encoder_lr = text_encoder_lr
         self.lr_scheduler_patience = lr_scheduler_patience
         self.lr_scheduler_factor = lr_scheduler_factor
 
@@ -75,7 +83,19 @@ class CLIPDualEncoderModel(LightningModule):
         return image_embeddings, text_embeddings
 
     def configure_optimizers(self):
-        optimizer = optim.AdamW(self.parameters(), weight_decay=self.weight_decay)
+        parameters = [
+            {"params": self.image_encoder.parameters(), "lr": self.image_encoder_lr},
+            {"params": self.text_encoder.parameters(), "lr": self.text_encoder_lr},
+            {
+                "params": itertools.chain(
+                    self.image_projection.parameters(),
+                    self.text_projection.parameters(),
+                ),
+                "lr": self.head_lr,
+                "weight_decay": self.weight_decay,
+            },
+        ]
+        optimizer = optim.AdamW(parameters, weight_decay=self.weight_decay)
         lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             mode="min",
@@ -85,7 +105,7 @@ class CLIPDualEncoderModel(LightningModule):
         return {
             "optimizer": optimizer,
             "lr_scheduler": lr_scheduler,
-            "monitor": "val_loss"
+            "monitor": "val_loss",
         }
 
     def training_step(self, batch, *args, **kwargs):
@@ -93,7 +113,7 @@ class CLIPDualEncoderModel(LightningModule):
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()
         self.log("train_loss", loss)
         return loss
-    
+
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
         loss = self._compute_losses(image_embeddings, text_embeddings).mean()

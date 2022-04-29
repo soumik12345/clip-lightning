@@ -20,6 +20,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         tokenizer_alias: Optional[str] = None,
         target_size: Optional[int] = 512,
         max_length: int = 100,
+        lazy_loading: bool = False,
         train_batch_size: int = 16,
         val_batch_size: int = 16,
         num_workers: int = 4,
@@ -30,6 +31,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
         self.target_size = target_size
         self.max_length = max_length
+        self.lazy_loading = lazy_loading
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.num_workers = num_workers
@@ -53,6 +55,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             tokenizer=self.tokenizer,
             target_size=self.target_size,
             max_length=self.max_length,
+            lazy_loading=self.lazy_loading,
         )
         self.train_dataset, self.val_dataset = self.split_data(
             dataset, val_split=val_split
