@@ -20,12 +20,12 @@ class ImageRetrievalDataset(Dataset):
         super().__init__()
         self.artifact_id = artifact_id
         self.target_size = target_size
-        image_files, self.captions = self.fetch_dataset()
+        self.image_files, self.captions = self.fetch_dataset()
         self.lazy_loading = lazy_loading
         self.images = (
             [self.read_image(idx) for idx in tqdm(range(len(self)))]
             if lazy_loading
-            else image_files
+            else self.image_files
         )
         assert tokenizer is not None
         self.tokenized_captions = tokenizer(
