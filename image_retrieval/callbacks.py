@@ -97,10 +97,10 @@ class LogPredictionCallback(Callback):
         indices = indices.cpu()
         matches = []
 
-        print(f"idx: {indices}")
+        # print(f"idx: {indices}")
 
-        # for idx in indices:
-        #     matches.append([self.images[i] for i in idx])
+        for idx in indices:
+            matches.append([self.images[idx]])
         
         if isinstance(trainer.logger.experiment, wandb.wandb_run.Run):
             trainer.logger.experiment.log({"Predictions": self.create_table(matches)})
