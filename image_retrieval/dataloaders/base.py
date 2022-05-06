@@ -13,6 +13,7 @@ class ImageRetrievalDataset(Dataset):
         self,
         artifact_id: str,
         tokenizer=None,
+        single_image_overfilt: bool = False,
         target_size: Optional[int] = None,
         max_length: int = 100,
         lazy_loading: bool = False,
@@ -21,6 +22,9 @@ class ImageRetrievalDataset(Dataset):
         self.artifact_id = artifact_id
         self.target_size = target_size
         self.image_files, self.captions = self.fetch_dataset()
+        if single_image_overfilt:
+            self.image_files = self.image_files[:3]
+            self.captions = self.captions[:3]
         self.lazy_loading = lazy_loading
         self.images = (
             [self.read_image(idx) for idx in tqdm(range(len(self)))]

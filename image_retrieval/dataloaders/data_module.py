@@ -19,6 +19,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         artifact_id: str,
         dataset_name: str,
         val_split: float = 0.1,
+        single_image_overfilt: bool = False,
         tokenizer_alias: Optional[str] = None,
         target_size: Optional[int] = 512,
         max_length: int = 100,
@@ -32,6 +33,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.artifact_id = artifact_id
         self.dataset_name = dataset_name
         self.val_split = val_split
+        self.single_image_overfilt = single_image_overfilt
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_alias)
         self.target_size = target_size
         self.max_length = max_length
@@ -49,13 +51,11 @@ class ImageRetrievalDataModule(LightningDataModule):
         )
         return train_dataset, val_dataset
 
-    def setup(
-        self,
-        stage: Optional[str] = None,
-    ) -> None:
+    def setup(self, stage: Optional[str] = None,) -> None:
         dataset = DATASET_LOOKUP[self.dataset_name](
             artifact_id=self.artifact_id,
             tokenizer=self.tokenizer,
+            single_image_overfilt=self.single_image_overfilt,
             target_size=self.target_size,
             max_length=self.max_length,
             lazy_loading=self.lazy_loading,

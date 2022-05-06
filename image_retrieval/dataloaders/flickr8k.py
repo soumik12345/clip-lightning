@@ -11,11 +11,12 @@ class Flickr8kDataset(ImageRetrievalDataset):
         self,
         artifact_id: str,
         tokenizer=None,
+        single_image_overfilt: bool = False,
         target_size: Optional[int] = None,
         max_length: int = 100,
         lazy_loading: bool = False,
     ) -> None:
-        super().__init__(artifact_id, tokenizer, target_size, max_length, lazy_loading)
+        super().__init__(artifact_id, tokenizer, single_image_overfilt, target_size, max_length, lazy_loading)
 
     def fetch_dataset(self):
         if wandb.run is None:
