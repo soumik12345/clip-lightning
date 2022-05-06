@@ -17,7 +17,7 @@ class CLI(cli.LightningCLI):
 
 
 if __name__ == "__main__":
-    cli = CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None, run=False)
-    trainer = cli.trainer
-    data_module = cli.datamodule
+    CLI(CLIPDualEncoderModel, ImageRetrievalDataModule, save_config_callback=None)
+    # trainer = cli.trainer
+    # data_module = cli.datamodule
     
