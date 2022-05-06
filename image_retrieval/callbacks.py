@@ -91,7 +91,8 @@ class LogPredictionCallback(Callback):
         image_embeddings_normalized = F.normalize(image_embeddings, p=2, dim=-1)
         text_embeddings_normalized = F.normalize(text_embeddings, p=2, dim=-1)
         dot_similarity = text_embeddings_normalized @ image_embeddings_normalized.T
-        values, indices = torch.topk(dot_similarity.squeeze(0), self.max_matches * 5)
+        # values, indices = torch.topk(dot_similarity.squeeze(0), self.max_matches * 5)
+        values, indices = torch.topk(dot_similarity.squeeze(0), self.max_matches)
 
         indices = indices.cpu()
         matches = []
