@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 import torch
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class ImageRetrievalDataset(Dataset):
@@ -31,6 +32,10 @@ class ImageRetrievalDataset(Dataset):
         self.tokenized_captions = tokenizer(
             self.captions, padding=True, truncation=True, max_length=max_length
         )
+        self.norm_transform = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        )
 
     def read_image(self, image_file):
         image = Image.open(image_file)
@@ -54,7 +59,9 @@ class ImageRetrievalDataset(Dataset):
             if not self.lazy_loading
             else self.images[index]
         )
-        image = torch.tensor(np.array(image)).permute(2, 0, 1).float()
+        image = self.norm_transform(
+            torch.tensor(np.array(image)).permute(2, 0, 1).float()
+        )
         caption = self.captions[index]
         input_ids = torch.tensor(self.tokenized_captions["input_ids"])[index]
         attention_mask = torch.tensor(self.tokenized_captions["attention_mask"])[index]

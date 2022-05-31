@@ -5,6 +5,7 @@ from models.clip_model import CLIPDualEncoderModel
 from callbacks import LogPredictionCallback
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 
+
 class CLI(cli.LightningCLI):
     def add_arguments_to_parser(self, parser: cli.LightningArgumentParser) -> None:
         parser.link_arguments("model.text_encoder_alias", "data.tokenizer_alias")
