@@ -68,7 +68,6 @@ class ImageRetrievalDataModule(LightningDataModule):
         return DataLoader(
             self.train_dataset,
             batch_size=self.train_batch_size,
-            collate_fn=collate_fn,
             num_workers=self.num_workers,
         )
 
@@ -76,6 +75,5 @@ class ImageRetrievalDataModule(LightningDataModule):
         return DataLoader(
             self.val_dataset,
             batch_size=self.val_batch_size,
-            collate_fn=collate_fn,
             num_workers=self.num_workers,
         )

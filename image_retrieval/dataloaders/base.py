@@ -1,12 +1,12 @@
-import numpy as np
-from tqdm import tqdm
-from PIL import Image
-from typing import Optional
 from abc import abstractmethod
+from typing import Optional
 
+import albumentations as A
+import cv2
+import numpy as np
 import torch
+from PIL import Image
 from torch.utils.data import Dataset
-from torchvision import transforms
 
 
 class ImageRetrievalDataset(Dataset):
@@ -15,7 +15,7 @@ class ImageRetrievalDataset(Dataset):
         artifact_id: str,
         tokenizer=None,
         target_size: Optional[int] = None,
-        max_length: int = 100,
+        max_length: int = 200,
         lazy_loading: bool = False,
     ) -> None:
         super().__init__()
@@ -23,18 +23,16 @@ class ImageRetrievalDataset(Dataset):
         self.target_size = target_size
         self.image_files, self.captions = self.fetch_dataset()
         self.lazy_loading = lazy_loading
-        self.images = (
-            [self.read_image(idx) for idx in tqdm(range(len(self)))]
-            if lazy_loading
-            else self.image_files
-        )
+        self.images = self.image_files
         assert tokenizer is not None
         self.tokenized_captions = tokenizer(
-            self.captions, padding=True, truncation=True, max_length=max_length
+            list(self.captions), padding=True, truncation=True, max_length=max_length
         )
-        self.norm_transform = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
+        self.transforms = A.Compose(
+            [
+                A.Resize(target_size, target_size, always_apply=True),
+                A.Normalize(max_pixel_value=255.0, always_apply=True),
+            ]
         )
 
     def read_image(self, image_file):
@@ -54,15 +52,13 @@ class ImageRetrievalDataset(Dataset):
         return len(self.captions)
 
     def __getitem__(self, index):
-        image = (
-            self.read_image(self.images[index])
-            if not self.lazy_loading
-            else self.images[index]
-        )
-        image = self.norm_transform(
-            torch.tensor(np.array(image)).permute(2, 0, 1).float()
-        )
-        caption = self.captions[index]
-        input_ids = torch.tensor(self.tokenized_captions["input_ids"])[index]
-        attention_mask = torch.tensor(self.tokenized_captions["attention_mask"])[index]
-        return image, caption, input_ids, attention_mask
+        item = {
+            key: torch.tensor(values[index])
+            for key, values in self.tokenized_captions.items()
+        }
+        image = cv2.imread(self.image_files[index])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.transforms(image=image)["image"]
+        item["image"] = torch.tensor(image).permute(2, 0, 1).float()
+        item["caption"] = self.captions[index]
+        return item

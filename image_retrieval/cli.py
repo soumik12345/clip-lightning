@@ -4,6 +4,7 @@ from dataloaders.data_module import ImageRetrievalDataModule
 from models.clip_model import CLIPDualEncoderModel
 from callbacks import LogPredictionCallback
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
+from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 
 
 class CLI(cli.LightningCLI):
@@ -16,6 +17,7 @@ class CLI(cli.LightningCLI):
             "model.text_encoder_alias", "log_prediction_callback.tokenizer"
         )
         parser.add_lightning_class_args(ModelCheckpoint, "model_checkpoint")
+        parser.add_lightning_class_args(LearningRateMonitor, "lr_monitor")
 
 
 if __name__ == "__main__":

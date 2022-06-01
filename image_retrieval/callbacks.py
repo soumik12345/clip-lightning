@@ -4,12 +4,11 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from PIL import Image
+import wandb
 from pytorch_lightning.callbacks import Callback
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-import wandb
 from models import CLIPDualEncoderModel
 
 
@@ -17,7 +16,7 @@ class LogPredictionCallback(Callback):
     def __init__(
         self,
         tokenizer: str,
-        max_length: int = 10,
+        max_length: int = 200,
         max_matches: int = 5,
         max_images: int = 20,
     ) -> None:
@@ -32,6 +31,8 @@ class LogPredictionCallback(Callback):
         self.search_text = []
         self.images = None
 
+        self.is_setup = False
+
     def setup_search_text(self, text: List[str]):
         self.tokenized_captions = self.tokenizer(
             text, padding=True, truncation=True, max_length=self.max_length
@@ -43,7 +44,7 @@ class LogPredictionCallback(Callback):
         image_embedding_list = []
         with torch.no_grad():
             for batch in tqdm(self.validation_dataloader):
-                image, _, _, _ = batch
+                image = batch["image"]
                 image = image.to(pl_module.device)
                 image_features = pl_module.image_encoder(image)
                 image_embeddings = pl_module.image_projection(image_features)
@@ -74,14 +75,16 @@ class LogPredictionCallback(Callback):
         if self.validation_dataloader is None:
             self.validation_dataloader = trainer.datamodule.val_dataloader()
         if len(self.search_text) < self.max_images:
-            self.search_text.extend(batch[1])
+            self.search_text.extend(batch["caption"])
         elif len(self.search_text) > self.max_images:
             self.search_text = self.search_text[: self.max_images]
 
     def on_validation_epoch_end(
         self, trainer: pl.Trainer, pl_module: CLIPDualEncoderModel
     ) -> None:
-        self.setup_search_text(self.search_text)
+        if not self.is_setup:
+            self.setup_search_text(self.search_text)
+            self.is_setup = True
         if self.images is None:
             if isinstance(self.validation_dataloader.dataset, torch.utils.data.Subset):
                 self.images = self.validation_dataloader.dataset.dataset.images
