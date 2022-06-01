@@ -18,14 +18,14 @@ class LogPredictionCallback(Callback):
         tokenizer: str,
         max_length: int = 200,
         max_matches: int = 5,
-        max_images: int = 20,
+        max_sentences: int = 20,
     ) -> None:
         super().__init__()
         assert tokenizer is not None
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
         self.max_length = max_length
         self.max_matches = max_matches
-        self.max_images = max_images
+        self.max_sentences = max_sentences
         self.data_viz_table: Union[None, wandb.Table] = None
         self.validation_dataloader: Union[None, torch.utils.data.DataLoader] = None
         self.search_text = []
@@ -74,10 +74,10 @@ class LogPredictionCallback(Callback):
     ):
         if self.validation_dataloader is None:
             self.validation_dataloader = trainer.datamodule.val_dataloader()
-        if len(self.search_text) < self.max_images:
+        if len(self.search_text) < self.max_sentences:
             self.search_text.extend(batch["caption"])
-        elif len(self.search_text) > self.max_images:
-            self.search_text = self.search_text[: self.max_images]
+        elif len(self.search_text) > self.max_sentences:
+            self.search_text = self.search_text[: self.max_sentences]
 
     def on_validation_epoch_end(
         self, trainer: pl.Trainer, pl_module: CLIPDualEncoderModel
