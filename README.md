@@ -2,7 +2,7 @@
 # <center>⚡️ Natural Language based Image Search 🐝</center>
 <div align="center">
         <img src="https://i.imgur.com/gb6B4ig.png" width="300" /> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-        <img src="https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_static/images/logo.png" width="300" /> 
+        <img src="https://camo.githubusercontent.com/e8163d66137a0391b4b9e14f1f8fae8674badbcc0d26cc849815efc751be6a9c/68747470733a2f2f706c2d666c6173682d646174612e73332e616d617a6f6e6177732e636f6d2f6173736574735f6c696768746e696e672f646f63732f696d616765732f6c6f676f732f6c696768746e696e672d61692e706e67" width="300" /> 
 </div>
 
 This is a simple implementation of **Natural Language-based Image Search** inspired by the [CLIP](https://openai.com/blog/clip/) approach as proposed by the paper [**Learning Transferable Visual Models From Natural Language Supervision**](https://arxiv.org/abs/2103.00020) by OpenAI in [**PyTorch Lightning**](https://www.pytorchlightning.ai/). We also use [**Weights & Biases**](wandb.ai) for experiment tracking, visualizing results, comparing performance of different backbone models, hyperparameter optimization and to ensure reproducibility.
