@@ -18,9 +18,9 @@ class ImageRetrievalDataModule(LightningDataModule):
         self,
         artifact_id: str,
         dataset_name: str,
-        val_split: float = 0.1,
+        val_split: float = 0.2,
         tokenizer_alias: Optional[str] = None,
-        target_size: Optional[int] = 512,
+        target_size: Optional[int] = 224,
         max_length: int = 100,
         lazy_loading: bool = False,
         train_batch_size: int = 16,
@@ -68,7 +68,6 @@ class ImageRetrievalDataModule(LightningDataModule):
         return DataLoader(
             self.train_dataset,
             batch_size=self.train_batch_size,
-            collate_fn=collate_fn,
             num_workers=self.num_workers,
         )
 
@@ -76,6 +75,5 @@ class ImageRetrievalDataModule(LightningDataModule):
         return DataLoader(
             self.val_dataset,
             batch_size=self.val_batch_size,
-            collate_fn=collate_fn,
             num_workers=self.num_workers,
         )
