@@ -1,5 +1,6 @@
 from typing import Optional
 
+import albumentations as A
 from torch.utils.data import random_split, DataLoader
 from pytorch_lightning import LightningDataModule
 from transformers import AutoTokenizer
@@ -7,10 +8,11 @@ from transformers import AutoTokenizer
 from .base import ImageRetrievalDataset
 from .flickr8k import Flickr8kDataset
 from .flickr30k import Flickr30kDataset
+from .coco import COCODataset
 from .utils import collate_fn
 
 
-DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset}
+DATASET_LOOKUP = {"flickr8k": Flickr8kDataset, "flickr30k": Flickr30kDataset, "coco": COCODataset}
 
 
 class ImageRetrievalDataModule(LightningDataModule):
@@ -25,7 +27,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         lazy_loading: bool = False,
         train_batch_size: int = 16,
         val_batch_size: int = 16,
-        num_workers: int = 4,
+        num_workers: int = 12,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -65,6 +67,13 @@ class ImageRetrievalDataModule(LightningDataModule):
         )
 
     def train_dataloader(self):
+        self.train_dataset.transforms = A.Compose(
+            [
+                A.RandomResizedCrop(self.target_size, self.target_size),
+                A.HorizontalFlip(p=0.5),
+                A.Normalize(max_pixel_value=255.0, always_apply=True)
+            ]
+        )
         return DataLoader(
             self.train_dataset,
             batch_size=self.train_batch_size,

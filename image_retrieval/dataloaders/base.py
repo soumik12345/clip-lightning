@@ -37,11 +37,11 @@ class ImageRetrievalDataset(Dataset):
 
     def read_image(self, image_file):
         image = Image.open(image_file)
-        image = (
-            image.resize((self.target_size, self.target_size))
-            if self.target_size is not None
-            else image
-        )
+        # image = (
+        #     image.resize((self.target_size, self.target_size))
+        #     if self.target_size is not None
+        #     else image
+        # )
         return image
 
     @abstractmethod

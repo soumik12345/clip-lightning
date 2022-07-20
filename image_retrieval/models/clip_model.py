@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from pytorch_lightning import LightningModule
+from pytorch_lightning.utilities.seed import seed_everything
 
 from .encoders import ImageEncoder, ProjectionHead, TextEncoder
 
@@ -27,6 +28,7 @@ class CLIPDualEncoderModel(LightningModule):
         text_encoder_lr: float = 1e-5,
         lr_scheduler_patience: float = 1.0,
         lr_scheduler_factor: float = 0.8,
+        seed: int = 42,
         *args,
         **kwargs,
     ) -> None:
@@ -57,8 +59,9 @@ class CLIPDualEncoderModel(LightningModule):
         self.text_encoder_lr = text_encoder_lr
         self.lr_scheduler_patience = lr_scheduler_patience
         self.lr_scheduler_factor = lr_scheduler_factor
-
+        seed_everything(seed)
         self.save_hyperparameters()
+
 
     def _compute_losses(self, image_embeddings, text_embeddings):
         logits = (text_embeddings @ image_embeddings.T) / self.temperature
@@ -69,7 +72,7 @@ class CLIPDualEncoderModel(LightningModule):
         )
         images_loss = (-targets.T * self.log_softmax(logits.T)).sum(1)
         texts_loss = (-targets * self.log_softmax(logits)).sum(1)
-        return (images_loss + texts_loss) / 2.0
+        return (images_loss + texts_loss) / 2.0, images_loss, texts_loss
 
     def forward(self, inputs):
         image_features = self.image_encoder(inputs["image"])
@@ -110,14 +113,20 @@ class CLIPDualEncoderModel(LightningModule):
 
     def training_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        loss, image_loss, text_loss = self._compute_losses(image_embeddings, text_embeddings)
+        loss = loss.mean()
         train_loss = self.all_gather(loss)
         self.log("train/loss", train_loss.mean())
+        self.log("train/image_loss", image_loss.mean())
+        self.log("train/text_loss", text_loss.mean())
         return loss
 
     def validation_step(self, batch, *args, **kwargs):
         image_embeddings, text_embeddings = self.forward(batch)
-        loss = self._compute_losses(image_embeddings, text_embeddings).mean()
+        loss, image_loss, text_loss = self._compute_losses(image_embeddings, text_embeddings)
+        loss = loss.mean()
         val_loss = self.all_gather(loss)
         self.log("val/loss", val_loss.mean())
+        self.log("val/image_loss", image_loss.mean())
+        self.log("val/text_loss", text_loss.mean())
         return loss
