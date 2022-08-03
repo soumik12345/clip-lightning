@@ -28,6 +28,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         train_batch_size: int = 16,
         val_batch_size: int = 16,
         num_workers: int = 12,
+        mask: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -41,6 +42,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.num_workers = num_workers
+        self.mask = mask
 
     @staticmethod
     def split_data(dataset: ImageRetrievalDataset, val_split: float):
@@ -61,6 +63,7 @@ class ImageRetrievalDataModule(LightningDataModule):
             target_size=self.target_size,
             max_length=self.max_length,
             lazy_loading=self.lazy_loading,
+            mask=self.mask
         )
         self.train_dataset, self.val_dataset = self.split_data(
             dataset, val_split=self.val_split
@@ -81,6 +84,7 @@ class ImageRetrievalDataModule(LightningDataModule):
         )
 
     def val_dataloader(self):
+        self.val_dataset.mask = False
         return DataLoader(
             self.val_dataset,
             batch_size=self.val_batch_size,

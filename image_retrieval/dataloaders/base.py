@@ -17,6 +17,7 @@ class ImageRetrievalDataset(Dataset):
         target_size: Optional[int] = None,
         max_length: int = 200,
         lazy_loading: bool = False,
+        mask: bool = False
     ) -> None:
         super().__init__()
         self.artifact_id = artifact_id
@@ -24,9 +25,18 @@ class ImageRetrievalDataset(Dataset):
         self.image_files, self.captions = self.fetch_dataset()
         self.lazy_loading = lazy_loading
         self.images = self.image_files
+        self.mask = mask
+
         assert tokenizer is not None
+
+        self.tokenizer = tokenizer
+
         self.tokenized_captions = tokenizer(
-            list(self.captions), padding=True, truncation=True, max_length=max_length
+            list(self.captions), 
+            padding=True, 
+            truncation=True, 
+            max_length=max_length,
+            return_tensors='pt'
         )
         self.transforms = A.Compose(
             [
@@ -34,6 +44,7 @@ class ImageRetrievalDataset(Dataset):
                 A.Normalize(max_pixel_value=255.0, always_apply=True),
             ]
         )
+
 
     def read_image(self, image_file):
         image = Image.open(image_file)
@@ -53,9 +64,21 @@ class ImageRetrievalDataset(Dataset):
 
     def __getitem__(self, index):
         item = {
-            key: torch.tensor(values[index])
+            key: values[index]
             for key, values in self.tokenized_captions.items()
         }
+
+        if self.mask:
+            c = item["input_ids"].clone().detach()
+
+            rand = torch.rand(c.shape)
+            mask_arr = rand < 0.15
+
+            mask_arr = (rand < 0.15) * (item["input_ids"] != self.tokenizer.cls_token_id) * (item["input_ids"] != self.tokenizer.sep_token_id)
+            selection = torch.flatten((mask_arr[0]).nonzero()).tolist()
+
+            item["input_ids"][selection] = self.tokenizer.mask_token_id
+
         image = cv2.imread(self.image_files[index])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = self.transforms(image=image)["image"]

@@ -1,5 +1,6 @@
 import itertools
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -29,6 +30,7 @@ class CLIPDualEncoderModel(LightningModule):
         lr_scheduler_patience: float = 1.0,
         lr_scheduler_factor: float = 0.8,
         seed: int = 42,
+        target_size: int = 224,
         *args,
         **kwargs,
     ) -> None:
@@ -41,8 +43,15 @@ class CLIPDualEncoderModel(LightningModule):
         self.text_encoder = TextEncoder(
             model_name=text_encoder_alias, trainable=text_encoder_trainable
         )
+
+        example_input = torch.rand((1, 3, target_size, target_size)).to(self.device)
+
+        example_out = self.image_encoder(example_input)
+        output_dims = example_out.shape[-1]
+        # print(output_dims)
+
         self.image_projection = ProjectionHead(
-            embedding_dim=image_embedding_dims,
+            embedding_dim=output_dims,
             projection_dim=projection_dims,
             dropout=dropout,
         )
